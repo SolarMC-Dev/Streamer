@@ -19,6 +19,10 @@
         <solar-parent.skipSources>false</solar-parent.skipSources>
     </properties>
 
+    <scm>
+        <developerConnection>scm:git:https://github.com/SolarMC-Dev/Streamer.git</developerConnection>
+    </scm>
+
     <repositories>
         <repository>
             <id>solar-releases</id>
