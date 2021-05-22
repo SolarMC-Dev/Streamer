@@ -1,9 +1,27 @@
+/*
+ * Streamer
+ * Copyright © 2021 SolarMC Developers
+ *
+ * Streamer is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Streamer is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Streamer. If not, see <https://www.gnu.org/licenses/>
+ * and navigate to version 3 of the GNU Lesser General Public License.
+ */
+
 package gg.solarmc.streamer;
 
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.function.BiConsumer;
@@ -33,7 +51,7 @@ final class SpliteratorStream<T> implements Stream<T> {
     private boolean used;
 
     SpliteratorStream(Spliterator<T> spliterator) {
-        this.spliterator = Objects.requireNonNull(spliterator, "spliterator");
+        this.spliterator = spliterator;
     }
     
     private void markUsed() {
@@ -61,19 +79,63 @@ final class SpliteratorStream<T> implements Stream<T> {
         spliterator.forEachRemaining(action);
     }
 
-    /*
-     * Delegated to the JDK implementation
-     */
+    private <U> Stream<U> createStream(Spliterator<U> spliterator) {
+        markUsed();
+        return new SpliteratorStream<>(spliterator);
+    }
 
     @Override
     public Stream<T> filter(Predicate<? super T> predicate) {
-        return jdkDelegate().filter(predicate);
+        return createStream(new FilteringSpliterator<>(spliterator, predicate));
     }
 
     @Override
     public <R> Stream<R> map(Function<? super T, ? extends R> mapper) {
-        return jdkDelegate().map(mapper);
+        return createStream(new MappingSpliterator<>(spliterator, mapper));
     }
+
+    @Override
+    public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
+        return createStream(new FlatMappingSpliterator<>(spliterator, mapper));
+    }
+
+    @Override
+    public Iterator<T> iterator() {
+        markUsed();
+        return new SpliteratorIterator<>(spliterator);
+    }
+
+    @Override
+    public Spliterator<T> spliterator() {
+        markUsed();
+        return spliterator;
+    }
+
+    @Override
+    public Stream<T> peek(Consumer<? super T> action) {
+        return createStream(new PeekingSpliterator<>(spliterator, action));
+    }
+
+    @Override
+    public <R> R collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator, BiConsumer<R, R> combiner) {
+        markUsed();
+        R result = supplier.get();
+        spliterator.forEachRemaining((element) -> accumulator.accept(result, element));
+        return result;
+    }
+
+    @Override
+    public <R, A> R collect(Collector<? super T, A, R> collector) {
+        markUsed();
+        A container = collector.supplier().get();
+        var accumulator = collector.accumulator();
+        spliterator.forEachRemaining((element) -> accumulator.accept(container, element));
+        return collector.finisher().apply(container);
+    }
+
+    /*
+     * Delegated to the JDK implementation
+     */
 
     @Override
     public IntStream mapToInt(ToIntFunction<? super T> mapper) {
@@ -88,11 +150,6 @@ final class SpliteratorStream<T> implements Stream<T> {
     @Override
     public DoubleStream mapToDouble(ToDoubleFunction<? super T> mapper) {
         return jdkDelegate().mapToDouble(mapper);
-    }
-
-    @Override
-    public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
-        return jdkDelegate().flatMap(mapper);
     }
 
     @Override
@@ -146,11 +203,6 @@ final class SpliteratorStream<T> implements Stream<T> {
     }
 
     @Override
-    public Stream<T> peek(Consumer<? super T> action) {
-        return jdkDelegate().peek(action);
-    }
-
-    @Override
     public Stream<T> limit(long maxSize) {
         return jdkDelegate().limit(maxSize);
     }
@@ -196,16 +248,6 @@ final class SpliteratorStream<T> implements Stream<T> {
     }
 
     @Override
-    public <R> R collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator, BiConsumer<R, R> combiner) {
-        return jdkDelegate().collect(supplier, accumulator, combiner);
-    }
-
-    @Override
-    public <R, A> R collect(Collector<? super T, A, R> collector) {
-        return jdkDelegate().collect(collector);
-    }
-
-    @Override
     public List<T> toList() {
         return jdkDelegate().toList();
     }
@@ -248,16 +290,6 @@ final class SpliteratorStream<T> implements Stream<T> {
     @Override
     public Optional<T> findAny() {
         return jdkDelegate().findAny();
-    }
-
-    @Override
-    public Iterator<T> iterator() {
-        return jdkDelegate().iterator();
-    }
-
-    @Override
-    public Spliterator<T> spliterator() {
-        return jdkDelegate().spliterator();
     }
 
     @Override
