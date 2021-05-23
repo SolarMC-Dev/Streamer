@@ -33,8 +33,8 @@ import java.util.concurrent.TimeUnit;
 
 @BenchmarkMode({Mode.Throughput, Mode.SingleShotTime})
 @OutputTimeUnit(TimeUnit.MICROSECONDS)
-@Warmup(iterations = 6, time = 5)
-@Measurement(iterations = 6, time = 5)
+@Warmup(iterations = 8, time = 4)
+@Measurement(iterations = 10, time = 4)
 public class MapForEachBenchmark {
 
     private static final Set<Integer> source = Set.of(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12);
