@@ -133,6 +133,11 @@ final class SpliteratorStream<T> implements Stream<T> {
         return collector.finisher().apply(container);
     }
 
+    @Override
+    public Stream<T> limit(long maxSize) {
+        return createStream(new LimitedSpliterator<>(spliterator, maxSize));
+    }
+
     /*
      * Delegated to the JDK implementation
      */
@@ -200,11 +205,6 @@ final class SpliteratorStream<T> implements Stream<T> {
     @Override
     public Stream<T> sorted(Comparator<? super T> comparator) {
         return jdkDelegate().sorted(comparator);
-    }
-
-    @Override
-    public Stream<T> limit(long maxSize) {
-        return jdkDelegate().limit(maxSize);
     }
 
     @Override

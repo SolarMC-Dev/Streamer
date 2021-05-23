@@ -62,4 +62,11 @@ public class IteratorTest {
         assertThrows(NoSuchElementException.class, iter::next);
     }
 
+    @TestTemplate
+    public void iterator4(StreamFactory factory) {
+        Iterator<Object> iter = factory.stream(List.of()).iterator();
+        assertFalse(iter.hasNext());
+        assertThrows(NoSuchElementException.class, iter::next);
+    }
+
 }

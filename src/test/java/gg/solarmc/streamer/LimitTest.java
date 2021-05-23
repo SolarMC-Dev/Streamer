@@ -19,7 +19,7 @@
 
 package gg.solarmc.streamer;
 
-import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -29,8 +29,11 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.IntConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(TestContextExtention.class)
 public class LimitTest {
@@ -42,38 +45,44 @@ public class LimitTest {
                 factory.stream(List.of(1, 2, 3, 4, 5)).limit(3).toList());
     }
 
-    @Disabled("JDK limit(int) removes SIZED")
     @TestTemplate
-    public void limitCharacteristics1(StreamFactory factory) {
-        limitCharacteristics(factory, List.of(1, 2, 3));
+    public void limitAndForEach(StreamFactory factory) {
+        IntConsumer intConsumer = mock(IntConsumer.class);
+        factory.stream(List.of(1, 2, 3, 4, 5)).limit(3).forEach(intConsumer::accept);
+        verify(intConsumer).accept(1);
+        verify(intConsumer).accept(2);
+        verify(intConsumer).accept(3);
     }
 
-    @Disabled("JDK limit(int) removes SIZED")
-    @TestTemplate
-    public void limitCharacteristics2(StreamFactory factory) {
-        limitCharacteristics(factory, new ArrayList<>(List.of(1, 2, 3)));
+    // The JDK's limit(int) removes the SIZED characteristic
+
+    @Test
+    public void limitCharacteristics1() {
+        limitCharacteristics(List.of(1, 2, 3));
     }
 
-    @Disabled("JDK limit(int) removes SIZED")
-    @TestTemplate
-    public void limitCharacteristics3(StreamFactory factory) {
-        limitCharacteristics(factory, Arrays.asList(1, 2, 3));
+    @Test
+    public void limitCharacteristics2() {
+        limitCharacteristics(new ArrayList<>(List.of(1, 2, 3)));
     }
 
-    @Disabled("JDK limit(int) removes SIZED")
-    @TestTemplate
-    public void limitCharacteristics4(StreamFactory factory) {
-        limitCharacteristics(factory, Set.of(1, 2, 3));
+    @Test
+    public void limitCharacteristics3() {
+        limitCharacteristics(Arrays.asList(1, 2, 3));
     }
 
-    @Disabled("JDK limit(int) removes SIZED")
-    @TestTemplate
-    public void limitCharacteristics5(StreamFactory factory) {
-        limitCharacteristics(factory, new HashSet<>(Set.of(1, 2, 3)));
+    @Test
+    public void limitCharacteristics4() {
+        limitCharacteristics(Set.of(1, 2, 3));
     }
 
-    private void limitCharacteristics(StreamFactory factory, Collection<Integer> source) {
-        SpliteratorComparison.ofSource(factory, source)
+    @Test
+    public void limitCharacteristics5() {
+        limitCharacteristics(new HashSet<>(Set.of(1, 2, 3)));
+    }
+
+    private void limitCharacteristics(Collection<Integer> source) {
+        SpliteratorComparison.ofSource(StreamFactory.StreamerStreamFactory.INSTANCE, source)
                 .operation((s) -> s.limit(5))
                 .assertCharacteristics();
     }

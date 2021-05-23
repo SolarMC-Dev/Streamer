@@ -26,30 +26,29 @@ import java.util.function.Consumer;
 final class LimitedSpliterator<T> implements Spliterator<T> {
 
     private final Spliterator<T> delegate;
-    private final int limit;
-    private int amount;
+    private long limit;
 
-    LimitedSpliterator(Spliterator<T> delegate, int limit) {
+    LimitedSpliterator(Spliterator<T> delegate, long limit) {
         this.delegate = delegate;
         this.limit = limit;
     }
 
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
-        if (amount == limit) {
+        if (limit == 0) {
             return false;
         }
-        amount++; // Okay if amount exceeds size of delegate spliterator
+        limit--;
         return delegate.tryAdvance(action);
     }
 
     @Override
     public void forEachRemaining(Consumer<? super T> action) {
         do {
-            if (amount == limit) {
+            if (limit == 0) {
                 return;
             }
-            amount++;
+            limit--;
         } while (delegate.tryAdvance(action));
     }
 
@@ -61,7 +60,7 @@ final class LimitedSpliterator<T> implements Spliterator<T> {
 
     @Override
     public long estimateSize() {
-        return Math.min(delegate.estimateSize(), limit - amount);
+        return Math.min(delegate.estimateSize(), limit);
     }
 
     @Override
