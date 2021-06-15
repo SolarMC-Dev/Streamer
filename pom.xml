@@ -10,7 +10,7 @@
 
     <groupId>gg.solarmc.streamer</groupId>
     <artifactId>streamer</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.1</version>
 
     <properties>
         <junit.version>5.7.1</junit.version>
@@ -20,7 +20,7 @@
 
     <scm>
         <developerConnection>scm:git:https://github.com/SolarMC-Dev/Streamer.git</developerConnection>
-      <tag>HEAD</tag>
+      <tag>0.1.1</tag>
   </scm>
 
     <profiles>
