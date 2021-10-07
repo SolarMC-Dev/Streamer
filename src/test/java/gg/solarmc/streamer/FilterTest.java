@@ -34,6 +34,8 @@ import java.util.function.Predicate;
 import static java.util.Spliterator.SIZED;
 import static java.util.Spliterator.SUBSIZED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -56,6 +58,18 @@ public class FilterTest {
         Predicate<Integer> even = (n) -> n % 2 == 0;
         IntConsumer intConsumer = mock(IntConsumer.class);
         factory.stream(List.of(1, 2, 3, 4)).filter(even).forEach(intConsumer::accept);
+        verify(intConsumer).accept(2);
+        verify(intConsumer).accept(4);
+    }
+
+    @TestTemplate
+    public void filterAndTryAdvance(StreamFactory factory) {
+        Predicate<Integer> even = (n) -> n % 2 == 0;
+        IntConsumer intConsumer = mock(IntConsumer.class);
+        var spliterator = factory.stream(List.of(1, 2, 3, 4)).filter(even).spliterator();
+        assertTrue(spliterator.tryAdvance(intConsumer::accept));
+        assertTrue(spliterator.tryAdvance(intConsumer::accept));
+        assertFalse(spliterator.tryAdvance(intConsumer::accept));
         verify(intConsumer).accept(2);
         verify(intConsumer).accept(4);
     }

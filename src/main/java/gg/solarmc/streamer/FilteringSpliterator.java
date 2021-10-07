@@ -38,13 +38,23 @@ final class FilteringSpliterator<T> implements Spliterator<T> {
     @Override
     public boolean tryAdvance(Consumer<? super T> action) {
         Boxes.Bool boolBox = Boxes.obtainBool();
-        delegate.tryAdvance((element) -> {
-            if (filter.test(element)) {
-                action.accept(element);
-                boolBox.value = true;
+        // Track boolBox usage to ensure it is cleaned up
+        while (true) {
+            boolean hasMore = delegate.tryAdvance((element) -> {
+                if (filter.test(element)) {
+                    action.accept(element);
+                    boolBox.value = true;
+                }
+            });
+            if (!hasMore) {
+                return false;
             }
-        });
-        return boolBox.value;
+            if (boolBox.value) {
+                boolBox.value = false;
+                return true;
+            }
+            // Did not pass filter; try again
+        }
     }
 
     @Override

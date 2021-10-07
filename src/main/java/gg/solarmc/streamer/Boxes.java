@@ -35,7 +35,9 @@ final class Boxes {
     private static final ThreadLocal<Bool> boolRef = ThreadLocal.withInitial(Bool::new);
 
     static Bool obtainBool() {
-        return boolRef.get();
+        Bool bool = boolRef.get();
+        assert !bool.value : "Previous caller forgot to reset Bool.value";
+        return bool;
     }
 
     static final class Ref<T> {
@@ -49,6 +51,7 @@ final class Boxes {
     static <T> Boxes.Ref<T> obtainRef() {
         @SuppressWarnings("unchecked")
         Ref<T> casted = (Ref<T>) boxRef.get();
+        assert casted.value == null : "Previous caller forgot to null-out Ref.value";
         return casted;
     }
 

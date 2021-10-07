@@ -39,13 +39,16 @@ final class FlatMappingSpliterator<T, R> implements Spliterator<R> {
 
     private boolean obtainNextDelegate() {
         Boxes.Ref<T> refBox = Boxes.obtainRef();
+        // Track refBox usage to ensure it is cleaned up
         boolean found = sourceDelegate.tryAdvance((sourceElement) -> {
             refBox.value = sourceElement;
         });
         if (!found) {
             return false;
         }
-        Stream<? extends R> nextStream = mapper.apply(refBox.value);
+        T value = refBox.value;
+        refBox.value = null;
+        Stream<? extends R> nextStream = mapper.apply(value);
         currentDelegate = nextStream.spliterator();
         return true;
     }
