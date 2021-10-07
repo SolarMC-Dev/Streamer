@@ -5,12 +5,12 @@
     <parent>
         <groupId>gg.solarmc</groupId>
         <artifactId>solar-parent</artifactId>
-        <version>0.6.1</version>
+        <version>1.0.0</version>
     </parent>
 
     <groupId>gg.solarmc.streamer</groupId>
     <artifactId>streamer</artifactId>
-    <version>0.1.3-SNAPSHOT</version>
+    <version>0.1.4-SNAPSHOT</version>
 
     <properties>
         <junit.version>5.7.1</junit.version>
@@ -22,6 +22,28 @@
         <developerConnection>scm:git:https://github.com/SolarMC-Dev/Streamer.git</developerConnection>
       <tag>HEAD</tag>
   </scm>
+
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License, Version 3</name>
+            <url>https://www.gnu.org/licenses/lgpl-3.0-standalone.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>anandbeh</id>
+            <name>Anand Beh</name>
+            <email>theanandbeh@gmail.com</email>
+            <url>https://github.com/A248</url>
+            <roles>
+                <role>creator</role>
+                <role>developer</role>
+            </roles>
+            <timezone>America/New_York</timezone>
+        </developer>
+    </developers>
 
     <profiles>
         <profile>
@@ -117,8 +139,8 @@
 
     <repositories>
         <repository>
-            <id>solar-releases</id>
-            <url>https://mvn-repo.solarmc.gg/releases</url>
+            <id>solar-repo</id>
+            <url>https://repo.solarmc.gg/mvn</url>
         </repository>
     </repositories>
 </project>
