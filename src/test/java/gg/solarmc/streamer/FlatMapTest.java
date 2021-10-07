@@ -37,6 +37,7 @@ import static java.util.Spliterator.NONNULL;
 import static java.util.Spliterator.SIZED;
 import static java.util.Spliterator.SORTED;
 import static java.util.Spliterator.SUBSIZED;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -77,6 +78,21 @@ public class FlatMapTest {
         verify(intConsumer).accept(3);
         verify(intConsumer, times(2)).accept(4);
         verify(intConsumer).accept(5);
+    }
+
+    @TestTemplate
+    public void flatMapTryAdvance(StreamFactory factory) {
+        IntConsumer intConsumer = mock(IntConsumer.class);
+        var stream = factory.stream(List.of(0, 1)).flatMap((n) -> Stream.of(n, n + 1));
+        Spliterator<Integer> spliterator = stream.spliterator();
+        assertTrue(spliterator.tryAdvance(intConsumer::accept));
+        assertTrue(spliterator.tryAdvance(intConsumer::accept));
+        assertTrue(spliterator.tryAdvance(intConsumer::accept));
+        assertTrue(spliterator.tryAdvance(intConsumer::accept));
+        assertFalse(spliterator.tryAdvance(intConsumer::accept));
+        verify(intConsumer).accept(0);
+        verify(intConsumer, times(2)).accept(1);
+        verify(intConsumer).accept(2);
     }
 
     @TestTemplate

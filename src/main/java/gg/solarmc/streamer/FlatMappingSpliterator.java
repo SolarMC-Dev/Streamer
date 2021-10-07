@@ -52,14 +52,15 @@ final class FlatMappingSpliterator<T, R> implements Spliterator<R> {
 
     @Override
     public boolean tryAdvance(Consumer<? super R> action) {
-        if (currentDelegate == null && !obtainNextDelegate()) {
-            return false;
+        while (true) {
+            if (currentDelegate == null && !obtainNextDelegate()) {
+                return false;
+            }
+            if (currentDelegate.tryAdvance(action)) {
+                return true;
+            }
+            currentDelegate = null;
         }
-        if (currentDelegate.tryAdvance(action)) {
-            return true;
-        }
-        currentDelegate = null;
-        return obtainNextDelegate();
     }
 
     @Override
