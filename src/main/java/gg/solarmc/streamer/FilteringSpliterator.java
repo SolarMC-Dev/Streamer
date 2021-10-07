@@ -67,7 +67,7 @@ final class FilteringSpliterator<T> implements Spliterator<T> {
 
     @Override
     public long estimateSize() {
-        return Long.MAX_VALUE;
+        return delegate.estimateSize();
     }
 
     @Override
