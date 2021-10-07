@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Spliterator;
 import java.util.function.IntConsumer;
 import java.util.stream.Stream;
 
@@ -36,6 +37,7 @@ import static java.util.Spliterator.NONNULL;
 import static java.util.Spliterator.SIZED;
 import static java.util.Spliterator.SORTED;
 import static java.util.Spliterator.SUBSIZED;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -60,6 +62,20 @@ public class FlatMapTest {
         verify(intConsumer).accept(2);
         verify(intConsumer, times(2)).accept(3);
         verify(intConsumer).accept(4);
+        verify(intConsumer).accept(5);
+    }
+
+    @TestTemplate
+    public void flatMapTryAdvanceAndForEach(StreamFactory factory) {
+        IntConsumer intConsumer = mock(IntConsumer.class);
+        var stream = factory.stream(List.of(0, 3, 4)).flatMap((n) -> Stream.of(n, n + 1));
+        Spliterator<Integer> spliterator = stream.spliterator();
+        assertTrue(spliterator.tryAdvance(intConsumer::accept));
+        spliterator.forEachRemaining(intConsumer::accept);
+        verify(intConsumer).accept(0);
+        verify(intConsumer).accept(1);
+        verify(intConsumer).accept(3);
+        verify(intConsumer, times(2)).accept(4);
         verify(intConsumer).accept(5);
     }
 

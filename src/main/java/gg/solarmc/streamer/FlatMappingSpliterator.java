@@ -64,6 +64,9 @@ final class FlatMappingSpliterator<T, R> implements Spliterator<R> {
 
     @Override
     public void forEachRemaining(Consumer<? super R> action) {
+        if (currentDelegate != null) {
+            currentDelegate.forEachRemaining(action);
+        }
         sourceDelegate.forEachRemaining((element) -> {
             mapper.apply(element).forEach(action);
         });
@@ -71,6 +74,7 @@ final class FlatMappingSpliterator<T, R> implements Spliterator<R> {
 
     @Override
     public Spliterator<R> trySplit() {
+        // It is OK to ignore the currentDelegate here
         Spliterator<T> splitDelegate = sourceDelegate.trySplit();
         if (splitDelegate == null) {
             return null;
