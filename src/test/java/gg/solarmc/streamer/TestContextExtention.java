@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -54,7 +55,7 @@ public class TestContextExtention implements TestTemplateInvocationContextProvid
 
         @Override
         public List<Extension> getAdditionalExtensions() {
-            return List.of(new StreamFactoryParameterResolver(streamFactory));
+            return List.of(new StreamFactoryParameterResolver(streamFactory), new MockitoExtension());
         }
 
     }

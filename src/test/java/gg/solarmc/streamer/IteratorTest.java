@@ -25,11 +25,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.function.IntConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(TestContextExtention.class)
 public class IteratorTest {
@@ -67,6 +70,17 @@ public class IteratorTest {
         Iterator<Object> iter = factory.stream(List.of()).iterator();
         assertFalse(iter.hasNext());
         assertThrows(NoSuchElementException.class, iter::next);
+    }
+
+    @TestTemplate
+    public void iterator5(StreamFactory factory) {
+        Iterator<Integer> iter = factory.stream(List.of(1, 3, 5)).iterator();
+        assertTrue(iter.hasNext());
+        IntConsumer intConsumer = mock(IntConsumer.class);
+        iter.forEachRemaining(intConsumer::accept);
+        verify(intConsumer).accept(1);
+        verify(intConsumer).accept(3);
+        verify(intConsumer).accept(5);
     }
 
 }

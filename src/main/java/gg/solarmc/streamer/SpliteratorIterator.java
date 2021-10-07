@@ -67,6 +67,10 @@ final class SpliteratorIterator<T> implements Iterator<T> {
 
     @Override
     public void forEachRemaining(Consumer<? super T> action) {
+        if (cachedNext != null) {
+            action.accept(unboxNull(cachedNext));
+            cachedNext = null;
+        }
         delegate.forEachRemaining(action);
     }
 }
