@@ -135,6 +135,9 @@ final class SpliteratorStream<T> implements Stream<T> {
 
     @Override
     public Stream<T> limit(long maxSize) {
+        if (maxSize < 0) {
+            throw new IllegalArgumentException("maxSize must not be negative");
+        }
         return createStream(new LimitedSpliterator<>(spliterator, maxSize));
     }
 

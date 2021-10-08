@@ -32,6 +32,7 @@ import java.util.Set;
 import java.util.function.IntConsumer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
@@ -52,6 +53,12 @@ public class LimitTest {
         verify(intConsumer).accept(1);
         verify(intConsumer).accept(2);
         verify(intConsumer).accept(3);
+    }
+
+    @TestTemplate
+    public void limitNegative(StreamFactory factory) {
+        var stream = factory.stream(List.of(1, 2, 3));
+        assertThrows(IllegalArgumentException.class, () -> stream.limit(-1));
     }
 
     // The JDK's limit(int) removes the SIZED characteristic
