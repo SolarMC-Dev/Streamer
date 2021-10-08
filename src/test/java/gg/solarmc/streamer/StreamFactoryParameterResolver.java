@@ -24,7 +24,7 @@ import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.api.extension.ParameterResolutionException;
 import org.junit.jupiter.api.extension.ParameterResolver;
 
-class StreamFactoryParameterResolver implements ParameterResolver {
+final class StreamFactoryParameterResolver implements ParameterResolver {
 
     private final StreamFactory streamFactory;
 

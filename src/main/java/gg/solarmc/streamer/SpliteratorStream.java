@@ -60,7 +60,7 @@ final class SpliteratorStream<T> implements Stream<T> {
         }
         used = true;
     }
-    
+
     private Stream<T> jdkDelegate() {
         markUsed();
         return StreamSupport.stream(spliterator, false);
@@ -265,50 +265,87 @@ final class SpliteratorStream<T> implements Stream<T> {
         return jdkDelegate().max(comparator);
     }
 
+    /*
+     * Extraneous non-delegated implementations
+     */
+
     @Override
     public long count() {
-        return jdkDelegate().count();
+        markUsed();
+        long exactSize = spliterator.getExactSizeIfKnown();
+        if (exactSize != -1L) {
+            return exactSize;
+        }
+        long count = 0;
+        while (spliterator.tryAdvance((e) -> {})) {
+            count++;
+        }
+        return count;
     }
 
     @Override
     public boolean anyMatch(Predicate<? super T> predicate) {
-        return jdkDelegate().anyMatch(predicate);
+        markUsed();
+        Boxes.Bool boolBox = Boxes.obtainBool();
+        // Track boolBox usage to ensure it is cleaned up
+        while (spliterator.tryAdvance((element) -> {
+            if (predicate.test(element)) {
+                boolBox.value = true;
+            }
+        })) {
+            if (boolBox.value) {
+                // Passed predicate
+                boolBox.value = false;
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override
     public boolean allMatch(Predicate<? super T> predicate) {
-        return jdkDelegate().allMatch(predicate);
+        return noneMatch(predicate.negate());
     }
 
     @Override
     public boolean noneMatch(Predicate<? super T> predicate) {
-        return jdkDelegate().noneMatch(predicate);
+        return !anyMatch(predicate);
     }
 
     @Override
     public Optional<T> findFirst() {
-        return jdkDelegate().findFirst();
+        markUsed();
+        Boxes.Ref<T> refBox = Boxes.obtainRef();
+        // Track refBox usage to ensure it is cleaned up
+        if (spliterator.tryAdvance((element) -> refBox.value = element)) {
+            T value = refBox.value;
+            refBox.value = null;
+            return Optional.of(value);
+        };
+        return Optional.empty();
     }
 
     @Override
     public Optional<T> findAny() {
-        return jdkDelegate().findAny();
+        return findFirst();
     }
 
     @Override
     public boolean isParallel() {
-        return jdkDelegate().isParallel();
+        return false;
     }
 
     @Override
     public Stream<T> sequential() {
-        return jdkDelegate().sequential();
+        return this;
     }
 
     @Override
     public Stream<T> parallel() {
         return jdkDelegate().parallel();
     }
+
+    // Extraneous delegated implementations
 
     @Override
     public Stream<T> unordered() {

@@ -19,16 +19,14 @@
 
 package gg.solarmc.streamer;
 
-import org.junit.jupiter.api.extension.Extension;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContext;
 import org.junit.jupiter.api.extension.TestTemplateInvocationContextProvider;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.stream.Stream;
 
-public class TestContextExtention implements TestTemplateInvocationContextProvider {
+public final class TestContextExtention implements TestTemplateInvocationContextProvider {
+
     @Override
     public boolean supportsTestTemplate(ExtensionContext context) {
         return true;
@@ -38,26 +36,6 @@ public class TestContextExtention implements TestTemplateInvocationContextProvid
     public Stream<TestTemplateInvocationContext> provideTestTemplateInvocationContexts(ExtensionContext context) {
         return Stream.of(StreamFactory.JdkStreamFactory.INSTANCE, StreamFactory.StreamerStreamFactory.INSTANCE)
                 .map(TestContext::new);
-    }
-
-    private static final class TestContext implements TestTemplateInvocationContext {
-
-        private final StreamFactory streamFactory;
-
-        private TestContext(StreamFactory streamFactory) {
-            this.streamFactory = streamFactory;
-        }
-
-        @Override
-        public String getDisplayName(int invocationIndex) {
-            return "Testing with " + streamFactory;
-        }
-
-        @Override
-        public List<Extension> getAdditionalExtensions() {
-            return List.of(new StreamFactoryParameterResolver(streamFactory), new MockitoExtension());
-        }
-
     }
 
 }
